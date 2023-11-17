@@ -36,61 +36,74 @@ const Statistics = ({ good, neutral, bad, all, average, positive }) => (
 
 // Componente principal de la aplicación
 const App = () => {
-  // Estados para el feedback y las estadísticas
-  const [good, setGood] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0);
-  const [selected, setSelected] = useState(0); // Nuevo estado para la anécdota seleccionada
+  const [selected, setSelected] = useState(0);
+  const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0));
+  const [voteType, setVoteType] = useState(null); // Nuevo estado para el tipo de voto
+  const [voting, setVoting] = useState(false); // Nuevo estado para indicar si está votando
 
-  // Cálculos de estadísticas
-  const all = good + neutral + bad;
-  const average = (good - bad) / all || 0;
-  const positive = (good / all) * 100 || 0;
-
-  // Funciones para manejar clics en los botones
-  const handleGoodClick = () => setGood(good + 1);
-  const handleNeutralClick = () => setNeutral(neutral + 1);
-  const handleBadClick = () => setBad(bad + 1);
-
-  // Función para manejar el clic en el botón "Next Anecdote"
-  const handleNextClick = () => {
-    // Genera un índice aleatorio para seleccionar una anécdota diferente
-    const randomIndex = Math.floor(Math.random() * anecdotes.length);
-    setSelected(randomIndex);
+  const handleVoteClick = () => {
+    setVoting(true); // Cambia el estado para mostrar los botones de voto
   };
 
-  // Renderizado del componente
+  const handleTypeClick = (type) => {
+    const newVotes = [...votes];
+    newVotes[selected] += 1;
+    setVotes(newVotes);
+    setVoteType(type);
+  };
+
+  const handleNextClick = () => {
+    const randomIndex = Math.floor(Math.random() * anecdotes.length);
+    setSelected(randomIndex);
+    setVoteType(null);
+    setVoting(false); // Reinicia el estado de votación al cambiar de anécdota
+  };
+
+  const allVotes = votes.reduce((sum, vote) => sum + vote, 0);
+
   return (
     <>
-      <h1>Give Feedback</h1>
-      {/* Botones para dar feedback */}
-      <Button onClick={handleGoodClick} text="Good" />
-      <Button onClick={handleNeutralClick} text="Neutral" />
-      <Button onClick={handleBadClick} text="Bad" />
-      {/* Muestra las estadísticas solo si se ha recopilado al menos un feedback */}
-      {all > 0 && (
+      <h1>Anecdote of the Day</h1>
+      {/* Muestra la anécdota seleccionada */}
+      <div>{anecdotes[selected]}</div>
+      <div>Votes: {votes[selected]}</div>
+
+      {/* Botón "Vote" */}
+      {!voting && <Button onClick={handleVoteClick} text="Vote" />}
+
+      {/* Muestra los botones de voto solo si se ha hecho clic en el botón "Vote" */}
+      {voting && (
         <>
-          {/* Muestra la tabla de estadísticas */}
-          <Statistics
-            good={good}
-            neutral={neutral}
-            bad={bad}
-            all={all}
-            average={average}
-            positive={positive}
-          />
-          {/* Muestra la anécdota seleccionada */}
-          <h2>Anecdote of the Day</h2>
-          <div>{anecdotes[selected]}</div>
-          {/* Botón para mostrar la próxima anécdota aleatoria */}
-          <Button onClick={handleNextClick} text="Next Anecdote" />
+          <Button onClick={() => handleTypeClick('good')} text="Good" />
+          <Button onClick={() => handleTypeClick('neutral')} text="Neutral" />
+          <Button onClick={() => handleTypeClick('bad')} text="Bad" />
         </>
       )}
+
+      {/* Botones para mostrar la próxima anécdota */}
+      <Button onClick={handleNextClick} text="Next Anecdote" />
+
+      {/* Muestra la tabla de estadísticas solo si hay al menos un voto */}
+      <h2>Statistics</h2>
+      {allVotes > 0 ? (
+        <Statistics
+          good={votes[0]}
+          neutral={votes[1]}
+          bad={votes[2]}
+          all={allVotes}
+          average={(votes[0] - votes[2]) / allVotes || 0}
+          positive={(votes[0] / allVotes) * 100 || 0}
+        />
+      ) : (
+        <p>No votes yet</p>
+      )}
+
+      {/* Muestra el tipo de voto actual */}
+      {voteType && <p>You voted: {voteType}</p>}
     </>
   );
 };
 
-// Anécdotas disponibles
 const anecdotes = [
   'If it hurts, do it more often',
   'Adding manpower to a late software project makes it later!',

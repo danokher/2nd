@@ -38,11 +38,11 @@ const Statistics = ({ good, neutral, bad, all, average, positive }) => (
 const App = () => {
   const [selected, setSelected] = useState(0);
   const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0));
-  const [voteType, setVoteType] = useState(null); // Nuevo estado para el tipo de voto
-  const [voting, setVoting] = useState(false); // Nuevo estado para indicar si está votando
+  const [voteType, setVoteType] = useState(null);
+  const [voting, setVoting] = useState(false);
 
   const handleVoteClick = () => {
-    setVoting(true); // Cambia el estado para mostrar los botones de voto
+    setVoting(true);
   };
 
   const handleTypeClick = (type) => {
@@ -56,22 +56,22 @@ const App = () => {
     const randomIndex = Math.floor(Math.random() * anecdotes.length);
     setSelected(randomIndex);
     setVoteType(null);
-    setVoting(false); // Reinicia el estado de votación al cambiar de anécdota
+    setVoting(false);
   };
 
   const allVotes = votes.reduce((sum, vote) => sum + vote, 0);
 
+  // Encuentra el índice de la anécdota con más votos
+  const mostVotedIndex = votes.indexOf(Math.max(...votes));
+
   return (
     <>
       <h1>Anecdote of the Day</h1>
-      {/* Muestra la anécdota seleccionada */}
       <div>{anecdotes[selected]}</div>
       <div>Votes: {votes[selected]}</div>
 
-      {/* Botón "Vote" */}
       {!voting && <Button onClick={handleVoteClick} text="Vote" />}
 
-      {/* Muestra los botones de voto solo si se ha hecho clic en el botón "Vote" */}
       {voting && (
         <>
           <Button onClick={() => handleTypeClick('good')} text="Good" />
@@ -80,10 +80,8 @@ const App = () => {
         </>
       )}
 
-      {/* Botones para mostrar la próxima anécdota */}
       <Button onClick={handleNextClick} text="Next Anecdote" />
 
-      {/* Muestra la tabla de estadísticas solo si hay al menos un voto */}
       <h2>Statistics</h2>
       {allVotes > 0 ? (
         <Statistics
@@ -98,8 +96,12 @@ const App = () => {
         <p>No votes yet</p>
       )}
 
-      {/* Muestra el tipo de voto actual */}
       {voteType && <p>You voted: {voteType}</p>}
+
+      {/* Muestra la anécdota con más votos */}
+      <h2>Most Voted Anecdote</h2>
+      <div>{anecdotes[mostVotedIndex]}</div>
+      <div>Votes: {votes[mostVotedIndex]}</div>
     </>
   );
 };
